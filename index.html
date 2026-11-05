@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>스터디 버디 (StudyBuddy) - 동물 친구와 함께하는 시험 대비</title>
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #DDD6FE;
+      --primary-soft: #F5F3FF;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --accent-yellow: #FEF08A;
+      --accent-green: #BBF7D0;
+      --accent-pink: #FBCFE8;
+      --border: #E2E8F0;
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #EDE9FE;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.15);
+      overflow-x: hidden;
+    }
+
+    /* Top Bar */
+    header {
+      padding: 16px 20px 12px;
+      background: var(--card-bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 19px;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    .active-buddy-pill {
+      background: var(--primary-soft);
+      padding: 6px 12px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      border: 1px solid var(--primary-light);
+      cursor: pointer;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 16px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    /* Buddy Showcase Card */
+    .buddy-hero {
+      background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.25);
+    }
+    .buddy-hero::after {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 140px;
+      height: 140px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    .buddy-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .buddy-avatar-wrap {
+      width: 82px;
+      height: 82px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      flex-shrink: 0;
+      animation: float 3s ease-in-out infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .buddy-info {
+      flex: 1;
+    }
+    .buddy-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .buddy-dialogue {
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.95);
+      color: #1E1B4B;
+      padding: 10px 14px;
+      border-radius: 14px;
+      position: relative;
+      margin-top: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .buddy-dialogue::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 14px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 6px solid rgba(255, 255, 255, 0.95);
+    }
+
+    /* D-Day Highlight Card */
+    .dday-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .dday-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dday-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .dday-badge {
+      background: #FEE2E2;
+      color: #EF4444;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #F1F5F9;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8B5CF6, #EC4899);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .dday-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Checklist Section */
+    .checklist-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .task-item {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .task-item.done {
+      background: #F8FAFC;
+      border-color: #F1F5F9;
+      opacity: 0.7;
+    }
+    .task-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .task-item.done .task-check {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .task-item.done .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .task-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .task-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    /* Add Task Input */
+    .add-task-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .add-task-input {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+    .add-task-input:focus {
+      border-color: var(--primary);
+    }
+    .add-task-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Animal Buddy Picker View */
+    .buddy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .buddy-select-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .buddy-select-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+      transform: translateY(-2px);
+    }
+    .buddy-card-icon {
+      font-size: 44px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #F1F5F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .buddy-select-card.selected .buddy-card-icon {
+      background: white;
+    }
+    .buddy-card-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .buddy-card-role {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .buddy-card-quote {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Calendar Grid */
+    .calendar-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      border: 1px solid var(--border);
+    }
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .cal-day-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding-bottom: 4px;
+    }
+    .cal-cell {
+      height: 38px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+    .cal-cell.today {
+      font-weight: 800;
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    .cal-cell.has-exam {
+      background: #FEE2E2;
+      color: #EF4444;
+      font-weight: 800;
+      border: 1px solid #FECACA;
+    }
+    .cal-dot {
+      width: 4px;
+      height: 4px;
+      background: #EF4444;
+      border-radius: 50%;
+      margin-top: 2px;
+    }
+
+    /* Bottom Navigation Bar */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 420px;
+      height: 64px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 25%;
+    }
+    .nav-btn.active {
+      color: var(--primary);
+      font-weight: 800;
+    }
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Confetti Popup */
+    .toast-popup {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(30, 27, 75, 0.95);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+    }
+    .toast-popup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Top Bar -->
+  <header>
+    <div class="brand">
+      <span>🐾</span> 스터디 버디
+    </div>
+    <div class="active-buddy-pill" onclick="switchTab('buddies')">
+      <span id="headerBuddyIcon">🐹</span>
+      <span id="headerBuddyName">모찌 코치</span>
+    </div>
+  </header>
+
+  <!-- Confetti Toast -->
+  <div id="toast" class="toast-popup">
+    <span>🎉</span> <span id="toastMsg">할 일 완료! 모찌가 칭찬해요!</span>
+  </div>
+
+  <!-- Main View Router -->
+  <main id="viewContent">
+    <!-- View will be rendered dynamically by JS -->
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span>
+      <span>홈</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('calendar')">
+      <span class="nav-icon">📅</span>
+      <span>캘린더</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('tasks')">
+      <span class="nav-icon">✅</span>
+      <span>체크리스트</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('buddies')">
+      <span class="nav-icon">🐾</span>
+      <span>동물 버디</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+  // 7 Animal Buddies Profile Data
+  const BUDDIES = [
+    {
+      id: "hamster",
+      name: "모찌",
+      icon: "🐹",
+      role: "스파르타 열정 코치",
+      quote: "딴짓할 시간 없어! 딱 15분만 바짝 집중해보자, 뽜이야!",
+      desc: "게으름 피우는 꼴을 못 보는 불타는 햄스터",
+      cheers: [
+        "오케이 하나 해치웠다! 이 기세로 다음 것도 가자!",
+        "벌써 체크 하나 완료? 오늘 집중력 장난 아닌데?!",
+        "쉼표는 찍어도 마침표는 찍지 마! 계속 달려보자!"
+      ]
+    },
+    {
+      id: "rabbit",
+      name: "루루",
+      icon: "🐰",
+      role: "다정다감 칭찬 요정",
+      quote: "오늘도 충분히 잘하고 있어. 물 한 잔 마시고 조금만 더 힘내자!",
+      desc: "지친 마음을 따뜻하게 감싸주는 힐링 토끼",
+      cheers: [
+        "와, 고생했어! 차근차근 해내는 네 모습이 너무 멋져.",
+        "정말 대견해! 스스로를 토닥토닥해 줘 🐰",
+        "노력한 만큼 꼭 좋은 결과가 올 거야, 힘내자!"
+      ]
+    },
+    {
+      id: "cat",
+      name: "나비",
+      icon: "🐱",
+      role: "시크한 팩트폭격기",
+      quote: "D-5인데 기출문제 아직 절반도 안 풀었네? 얼른 끝내고 쉬어.",
+      desc: "군더더기 없이 객관적인 피드백을 주는 현실주의자 고양이",
+      cheers: [
+        "흥, 제법이네? 그래도 아직 갈 길 멀었으니 방심 금물이야.",
+        "하나 끝냈으니 칭찬은 해줄게. 다음 건 언제 할 거야?",
+        "생각보다 속도 빠른데? 이 속도 유지해봐."
+      ]
+    },
+    {
+      id: "dog",
+      name: "몽이",
+      icon: "🐶",
+      role: "우주 최강 응원단장",
+      quote: "주인님 최고! 문제 하나 풀 때마다 제 꼬리가 멈추질 않아요 왕왕!",
+      desc: "언제나 당신 곁에서 맹목적인 믿음을 주는 댕댕이",
+      cheers: [
+        "끼야호! 진짜 최고예요! 제가 엉덩이 춤 춰드릴게요 왕왕!",
+        "오늘 시험 만점 각이다! 몽이가 보장해요!",
+        "잘했다 잘했다 우리 주인님 최고다!"
+      ]
+    },
+    {
+      id: "owl",
+      name: "부우",
+      icon: "🦉",
+      role: "전략적 시간관리 멘토",
+      quote: "배점 높은 단원부터 공략하자. 전략이 승리를 만드는 법이야.",
+      desc: "데이터와 계획을 바탕으로 효율적인 공부를 돕는 지혜로운 올빼미",
+      cheers: [
+        "핵심 마일스톤 달성 확인. 목표 달성 확률이 8% 상승했어.",
+        "효율적인 시간 배분이었어. 다음 세션으로 넘어가자.",
+        "계획대로 정밀하게 진행 중이야. 훌륭해."
+      ]
+    },
+    {
+      id: "bear",
+      name: "포포",
+      icon: "🐻",
+      role: "멘탈 케어 지킴이",
+      quote: "불안해하지 마. 지금까지 묵묵히 쌓아온 네 노력이 널 지켜줄 거야.",
+      desc: "시험 울렁증을 단단한 바위처럼 든든하게 받쳐주는 곰돌이",
+      cheers: [
+        "긴장 풀고 심호흡 한 번 크게 쉬어봐. 넌 할 수 있어.",
+        "한 걸음씩만 걷다 보면 어느새 정상이야. 든든하다!",
+        "걱정은 내가 다 먹어치울게, 넌 그냥 하기만 해."
+      ]
+    },
+    {
+      id: "penguin",
+      name: "핑구",
+      icon: "🐧",
+      role: "디테일 오답노트 장인",
+      quote: "놓친 개념 하나가 등급을 바꿔요! 사소한 것도 다 체크해 뒀죠?",
+      desc: "빈틈없는 꼼꼼함으로 함정 문제를 싹 걸러주는 꼬마 펭귄",
+      cheers: [
+        "오케이, 완벽한 점검! 실수할 구멍이 점점 사라지고 있어요!",
+        "작은 디테일까지 챙기는 꼼꼼함, 아주 마음에 들어요!",
+        "빈틈 제로 달성 중! 이대로 완벽하게 가요!"
+      ]
+    }
+  ];
+
+  // App State
+  let state = {
+    activeTab: "home",
+    selectedBuddyId: "hamster",
+    dday: {
+      title: "2026 2학기 기말고사",
+      date: "2026-12-14",
+      totalDays: 45,
+      remainingDays: 39
+    },
+    tasks: [
+      { id: 1, title: "경영통계학 3단원 확률분포 정리", subject: "통계학", done: true },
+      { id: 2, title: "생산운영관리 기출 5개년 오답노트", subject: "생산관리", done: false },
+      { id: 3, title: "알고리즘 정렬 & 탐색 시간복잡도 암기", subject: "컴공", done: false },
+      { id: 4, title: "마케팅원론 STP 전략 케이스 정리", subject: "마케팅", done: false }
+    ],
+    exams: [
+      { date: "2026-12-14", name: "경영통계학" },
+      { date: "2026-12-16", name: "생산운영관리" },
+      { date: "2026-12-18", name: "알고리즘" }
+    ]
+  };
+
+  function getActiveBuddy() {
+    return BUDDIES.find(b => b.id === state.selectedBuddyId) || BUDDIES[0];
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    const toastMsg = document.getElementById("toastMsg");
+    toastMsg.innerText = msg;
+    toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2400);
+  }
+
+  function switchTab(tab) {
+    state.activeTab = tab;
+    document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+      const tabs = ["home", "calendar", "tasks", "buddies"];
+      btn.classList.toggle("active", tabs[idx] === tab);
+    });
+    render();
+  }
+
+  function toggleTask(id) {
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+    task.done = !task.done;
+    if (task.done) {
+      const buddy = getActiveBuddy();
+      const randomCheer = buddy.cheers[Math.floor(Math.random() * buddy.cheers.length)];
+      showToast(`${buddy.icon} ${buddy.name}: "${randomCheer}"`);
+    }
+    render();
+  }
+
+  function addTask() {
+    const input = document.getElementById("newTaskInput");
+    if (!input || !input.value.trim()) return;
+    const newTask = {
+      id: Date.now(),
+      title: input.value.trim(),
+      subject: "할일",
+      done: false
+    };
+    state.tasks.unshift(newTask);
+    showToast(`새 목표가 추가되었어요! 화이팅!`);
+    render();
+  }
+
+  function selectBuddy(buddyId) {
+    state.selectedBuddyId = buddyId;
+    const buddy = getActiveBuddy();
+    document.getElementById("headerBuddyIcon").innerText = buddy.icon;
+    document.getElementById("headerBuddyName").innerText = `${buddy.name} 버디`;
+    showToast(`${buddy.icon} ${buddy.name}(이)가 새 버디가 되었습니다!`);
+    switchTab("home");
+  }
+
+  // Render Views
+  function render() {
+    const container = document.getElementById("viewContent");
+    const buddy = getActiveBuddy();
+    document.getElementById("headerBuddyIcon").innerText = buddy.icon;
+    document.getElementById("headerBuddyName").innerText = `${buddy.name} 버디`;
+
+    const completedCount = state.tasks.filter(t => t.done).length;
+    const totalCount = state.tasks.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    if (state.activeTab === "home") {
+      container.innerHTML = `
+        <!-- Buddy Hero -->
+        <div class="buddy-hero">
+          <div class="buddy-content">
+            <div class="buddy-avatar-wrap">
+              ${buddy.icon}
+            </div>
+            <div class="buddy-info">
+              <span class="buddy-badge">${buddy.role}</span>
+              <h2 style="font-size: 19px; font-weight: 800;">${buddy.name}</h2>
+              <div class="buddy-dialogue">
+                "${buddy.quote}"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- D-Day Card -->
+        <div class="dday-card">
+          <div class="dday-header">
+            <div>
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">목표 시험</span>
+              <div class="dday-title">${state.dday.title}</div>
+            </div>
+            <div class="dday-badge">D-${state.dday.remainingDays}</div>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+          </div>
+          <div class="dday-footer">
+            <span>체크리스트 진행도 <strong>${completedCount}/${totalCount}</strong></span>
+            <span>달성률 <strong>${progressPercent}%</strong></span>
+          </div>
+        </div>
+
+        <!-- Today Checklist Preview -->
+        <div>
+          <div class="section-title">
+            <span>오늘의 체크리스트</span>
+            <span style="font-size: 13px; color: var(--primary); cursor: pointer;" onclick="switchTab('tasks')">전체보기 →</span>
+          </div>
+          <div class="checklist-wrap">
+            ${state.tasks.slice(0, 3).map(task => `
+              <div class="task-item ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">
+                <div class="task-check">${task.done ? '✓' : ''}</div>
+                <div class="task-title">${task.title}</div>
+                <div class="task-tag">${task.subject}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (state.activeTab === "calendar") {
+      container.innerHTML = `
+        <div class="section-title">
+          <span>시험 일정 & 캘린더</span>
+          <span style="font-size: 12px; color: var(--text-muted);">2026년 12월</span>
+        </div>
+
+        <!-- Calendar Component -->
+        <div class="calendar-card">
+          <div class="cal-header">
+            <span>◀ 2026. 12 ▶</span>
+            <span style="font-size: 12px; color: #EF4444; font-weight: 700;">🔴 시험 일정</span>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-label">일</div>
+            <div class="cal-day-label">월</div>
+            <div class="cal-day-label">화</div>
+            <div class="cal-day-label">수</div>
+            <div class="cal-day-label">목</div>
+            <div class="cal-day-label">금</div>
+            <div class="cal-day-label">토</div>
+
+            <!-- Empty slots for Nov -->
+            <div class="cal-cell" style="opacity: 0.3;">29</div>
+            <div class="cal-cell" style="opacity: 0.3;">30</div>
+
+            <!-- Dec Days -->
+            <div class="cal-cell">1</div>
+            <div class="cal-cell">2</div>
+            <div class="cal-cell">3</div>
+            <div class="cal-cell">4</div>
+            <div class="cal-cell">5</div>
+            <div class="cal-cell">6</div>
+            <div class="cal-cell">7</div>
+            <div class="cal-cell">8</div>
+            <div class="cal-cell">9</div>
+            <div class="cal-cell">10</div>
+            <div class="cal-cell">11</div>
+            <div class="cal-cell">12</div>
+            <div class="cal-cell">13</div>
+            <div class="cal-cell has-exam">14<div class="cal-dot"></div></div>
+            <div class="cal-cell">15</div>
+            <div class="cal-cell has-exam">16<div class="cal-dot"></div></div>
+            <div class="cal-cell">17</div>
+            <div class="cal-cell has-exam">18<div class="cal-dot"></div></div>
+            <div class="cal-cell">19</div>
+            <div class="cal-cell">20</div>
+            <div class="cal-cell today">21</div>
+            <div class="cal-cell">22</div>
+            <div class="cal-cell">23</div>
+            <div class="cal-cell">24</div>
+            <div class="cal-cell">25</div>
+            <div class="cal-cell">26</div>
+            <div class="cal-cell">27</div>
+            <div class="cal-cell">28</div>
+            <div class="cal-cell">29</div>
+            <div class="cal-cell">30</div>
+            <div class="cal-cell">31</div>
+          </div>
+        </div>
+
+        <!-- Upcoming Exam List -->
+        <div class="section-title" style="margin-top: 12px;">
+          <span>등록된 시험 과목</span>
+        </div>
+        <div class="checklist-wrap">
+          ${state.exams.map(e => `
+            <div class="task-item" style="border-left: 4px solid #EF4444;">
+              <div style="font-size: 20px;">📝</div>
+              <div class="task-title"><strong>${e.name}</strong></div>
+              <div style="font-size: 13px; font-weight: 700; color: #EF4444;">${e.date}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.activeTab === "tasks") {
+      container.innerHTML = `
+        <div class="section-title">
+          <span>시험 대비 체크리스트</span>
+          <span style="font-size: 12px; color: var(--primary); font-weight: 700;">${completedCount}/${totalCount} 완료</span>
+        </div>
+
+        <!-- Add Task Form -->
+        <div class="add-task-box">
+          <input type="text" id="newTaskInput" class="add-task-input" placeholder="새로운 공부 목표 입력..." onkeypress="if(event.key==='Enter') addTask()">
+          <button class="add-task-btn" onclick="addTask()">추가</button>
+        </div>
+
+        <div class="checklist-wrap" style="margin-top: 8px;">
+          ${state.tasks.map(task => `
+            <div class="task-item ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">
+              <div class="task-check">${task.done ? '✓' : ''}</div>
+              <div class="task-title">${task.title}</div>
+              <div class="task-tag">${task.subject}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.activeTab === "buddies") {
+      container.innerHTML = `
+        <div class="section-title">
+          <span>함께할 동물 버디 선택 (7종)</span>
+          <span style="font-size: 12px; color: var(--text-muted);">클릭하면 버디 교체</span>
+        </div>
+        <div class="buddy-grid">
+          ${BUDDIES.map(b => `
+            <div class="buddy-select-card ${b.id === state.selectedBuddyId ? 'selected' : ''}" onclick="selectBuddy('${b.id}')">
+              <div class="buddy-card-icon">${b.icon}</div>
+              <div class="buddy-card-name">${b.name}</div>
+              <div class="buddy-card-role">${b.role}</div>
+              <div class="buddy-card-quote">"${b.quote}"</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+
+  // Initial Run
+  render();
+</script>
+
+</body>
+</html>
